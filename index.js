@@ -2,7 +2,7 @@
 const { DataApiClient } = require('rqlite-js')
 const log = require('./logger')
 
-const CACHE_HOSTS = process.env.REACTION_CACHE_URL || ['http://reactions-cache-0.reactions-cache.datastore.svc.cluster.local:4001', 'http://reactions-cache-1.reactions-cache.datastore.svc.cluster.local:4001', 'http://reactions-cache-2.reactions-cache.datastore.svc.cluster.local:4001']
+const CACHE_HOSTS = process.env.REACTION_CACHE_URL || ['http://reactions-cache-0.reactions-cache-internal.datastore.svc.cluster.local:4001', 'http://reactions-cache-1.reactions-cache-internal.datastore.svc.cluster.local:4001', 'http://reactions-cache-2.reactions-cache-internal.datastore.svc.cluster.local:4001']
 
 const dataApiClient = new DataApiClient(CACHE_HOSTS)
 let TABLE_SET = new Set()
@@ -30,7 +30,7 @@ async function createTable(table){
     let sql = `CREATE TABLE IF NOT EXISTS "${table}" (id INTEGER PRIMARY KEY AUTOINCREMENT, trigger TEXT NOT NULL UNIQUE, response TEXT NOT NULL, anywhere INTEGER, ttl INTEGER)`
     let dataResults = await dataApiClient.execute(sql)
     if(dataResults?.hasError()){
-      log.error(dataResults)
+      log.error(dataResults?.getFirstError())
       return
     }
     TABLE_SET.add(table)
@@ -64,7 +64,7 @@ async function addReaction(table, { trigger, response, anywhere }){
     ]
     let dataResults = await dataApiClient.execute(sql)
     if(dataResults?.hasError()){
-      log.error(dataResults)
+      log.error(dataResults?.getFirstError())
       return
     }
     return dataResults?.get(0)?.getLastInsertId()
@@ -83,7 +83,7 @@ async function updateReaction(table, { id, trigger, response, anywhere }){
     ]
     let dataResults = await dataApiClient.execute(sql)
     if(dataResults?.hasError()){
-      log.error(dataResults)
+      log.error(dataResults?.getFirstError())
       return
     }
     return dataResults?.get(0)?.getRowsAffected()
@@ -100,7 +100,7 @@ async function getReactions(table){
     let sql = `SELECT id, trigger, response, anywhere FROM "${table}"`
     let dataResults = await dataApiClient.query(sql)
     if(dataResults.hasError()){
-      log.error(dataResults)
+      log.error(dataResults?.getFirstError())
       return
     }
     return dataResults?.toArray()
@@ -117,7 +117,7 @@ async function delReaction(table, id){
     let sql = `DELETE FROM "${table}" WHERE id=${id}`
     let dataResults = await dataApiClient.execute(sql)
     if(dataResults?.hasError()){
-      log.error(dataResults)
+      log.error(dataResults?.getFirstError())
       return
     }
     return dataResults?.get(0)?.getRowsAffected()
@@ -134,7 +134,7 @@ async function clearReactions(table){
     let sql = `DROP TABLE "${table}"`
     let dataResults = await dataApiClient.execute(sql)
     if(dataResults?.hasError()){
-      log.error(dataResults)
+      log.error(dataResults?.getFirstError())
       return
     }
     return dataResults?.get(0)?.getRowsAffected()

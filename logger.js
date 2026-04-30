@@ -5,8 +5,6 @@ function getTimeStamp(timestamp){
   return dateTime.toLocaleString('en-US', { timeZone: 'Etc/GMT+5', hour12: false })
 }
 module.exports.error = (err)=>{
-  let dataError = err?.getFirstError()
-  if(dataError) return console.error(`${getTimeStamp(Date.now())} [reactions-cache] ${dataError}`)
   console.error(`${getTimeStamp(Date.now())} ERROR [reactions-cache] ${err}`)
 }
 module.exports.info = (msg)=>{
