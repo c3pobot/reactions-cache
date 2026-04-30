@@ -14,7 +14,7 @@ async function checkTableExists(table){
     let sql = `SELECT name FROM sqlite_master WHERE type='table' AND name='${table}'`
     let dataResults = await dataApiClient.query(sql)
     if(dataResults?.hasError()){
-      log.error(dataResults)
+      log.error(dataResults?.getFirstError())
       return
     }
     if(dataResults?.get(0)?.data?.name == table){
