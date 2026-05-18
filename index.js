@@ -147,5 +147,6 @@ module.exports = {
   del: delReaction,
   get: getReactions,
   drop: clearReactions,
+  status: () => (true),
   update: updateReaction
 }
